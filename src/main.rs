@@ -40,9 +40,7 @@ async fn main() -> anyhow::Result<()> {
 
     println!("📸 Taking screenshot...");
     let params = ScreenshotParams::builder()
-        .build()
-        .map_err(|e| anyhow::anyhow!("Screenshot params error: {:?}", e))?;
-        
+        .build();
     page.save_screenshot(params, "voe_detailed.png").await?;
     println!("✅ Success! Screenshot saved as voe_detailed.png");
 
