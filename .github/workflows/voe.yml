@@ -23,9 +23,8 @@ jobs:
           sudo apt-get install -y google-chrome-stable
 
       - name: Build and Run Screenshot Script
-        # Запускаємо наш приклад як бінарний файл
-        run: cargo run --example voe_screenshot --release
-
+        run: cargo run --release
+        
       - name: Upload Screenshot Artifact
         # Цей крок завантажить файл, щоб ви могли його скачати в інтерфейсі GitHub
         uses: actions/upload-artifact@v4
