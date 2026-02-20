@@ -1,0 +1,10 @@
+[package]
+name = "voe-scraper"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+# Підключаємо бібліотеку прямо з GitHub, оскільки це надійніше для нових проєктів
+hca = { git = "https://github.com/marirs/headless-chrome-automation.git" }
+tokio = { version = "1.0", features = ["full"] }
+anyhow = "1.0"
