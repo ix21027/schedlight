@@ -1,35 +1,54 @@
-use hca::create_browser_with_config;
+use chaser_oxide::{Browser, BrowserConfig, ChaserPage, ChaserProfile};
+use chaser_oxide::page::ScreenshotParams;
+use futures::StreamExt;
 use std::time::Duration;
 use tokio::time::sleep;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    println!("Starting VOE screenshot task...");
+    println!("🤖 Starting Chaser Oxide stealth browser...");
 
-    // 1. Ініціалізація браузера: Headless = true, Розмір = 1920x1080
-    // Це критично для GitHub Actions, інакше скрипт впаде без графічного інтерфейсу
-    let mut browser = create_browser_with_config(true, 1920, 1080).await?;
+    // 1. Створюємо профіль, який імітує Windows, щоб обдурити Cloudflare
+    let profile = ChaserProfile::windows().build();
 
-    // 2. Увімкнення обходу захисту (на випадок Cloudflare або WAF на voe.com.ua)
-    // Це фішка вашого репозиторію
+    // 2. Налаштовуємо браузер
+    // with_head() обов'язковий! Ми сховаємо вікно через Xvfb на сервері
+    let config = BrowserConfig::builder()
+        .with_head() 
+        .window_size(1920, 1080)
+        .build()
+        .map_err(|e| anyhow::anyhow!("Browser config error: {:?}", e))?;
+
+    println!("🚀 Launching browser...");
+    let (mut browser, mut handler) = Browser::launch(config).await?;
+
+    // 3. Запускаємо обробник подій браузера у фоновому потоці (обов'язково для chromiumoxide)
+    let handler_task = tokio::spawn(async move {
+        while let Some(_) = handler.next().await {}
+    });
+
+    // 4. Створюємо нову вкладку
+    let page = browser.new_page("https://www.voe.com.ua/disconnection/detailed").await?;
     
+    // 5. Обертаємо сторінку в ChaserPage для активації stealth-режиму (ізоляція змінних, патч WebGL тощо)
+    let _chaser = ChaserPage::new(page.clone());
 
-    // 3. Навігація
-    let url = "https://www.voe.com.ua/disconnection/detailed";
-    println!("Navigating to: {}", url);
-    browser.navigate_to(url).await?;
-    browser.handle_cloudflare(30000).await?;
-    // 4. Очікування завантаження контенту (SPA сайти можуть вантажитись поступово)
-    println!("Waiting for page load...");
-    sleep(Duration::from_secs(10)).await;
+    println!("⏳ Navigating and waiting for Cloudflare challenge to pass (20s)...");
+    
+    // Cloudflare turnstile потребує часу, щоб виконати JS challenges та відмалювати сторінку
+    sleep(Duration::from_secs(20)).await;
 
-    // 5. Знімок екрана
-    let filename = "voe_detailed.png";
-    browser.take_screenshot(filename).await?;
-    println!("Screenshot saved to: {}", filename);
+    println!("📸 Taking screenshot...");
+    let params = ScreenshotParams::builder()
+        .build()
+        .map_err(|e| anyhow::anyhow!("Screenshot params error: {:?}", e))?;
+        
+    page.save_screenshot(params, "voe_detailed.png").await?;
+    println!("✅ Success! Screenshot saved as voe_detailed.png");
 
-    // 6. Завершення роботи
-    browser.quit().await?;
+    // Завершуємо роботу
+    browser.close().await?;
+    handler_task.abort();
     
     Ok(())
 }
