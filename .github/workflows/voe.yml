@@ -26,8 +26,7 @@ jobs:
           
           # Системні бібліотеки, необхідні для роботи Chrome в Ubuntu
           sudo apt-get update
-          sudo apt-get install -y libnss3 libatk-bridge2.0-0 libgtk-3-0 libasound2 libx11-xcb1
-
+          sudo apt-get install -y libnss3 libatk-bridge2.0-0 libgtk-3-0 libx11-xcb1
       - name: Run Script
         run: node scraper.js
 
