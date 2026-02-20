@@ -1,7 +1,6 @@
-name: VOE Screenshot Automation
+name: VOE Screenshot Chaser Oxide
 
 on:
-  push:
   workflow_dispatch:
   schedule:
     - cron: '0 7 * * *'
@@ -17,22 +16,19 @@ jobs:
       - name: Install Rust Toolchain
         uses: dtolnay/rust-toolchain@stable
 
-      - name: Install Google Chrome (Linux version)
+      # Встановлюємо Chrome + Xvfb (віртуальний монітор)
+      - name: Install Google Chrome and Xvfb
         run: |
           wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-          sudo apt-get install -y ./google-chrome-stable_current_amd64.deb
+          sudo apt-get update
+          sudo apt-get install -y ./google-chrome-stable_current_amd64.deb xvfb
 
-      # ОСЬ НАШ ГЕНІАЛЬНИЙ ХАК
-      - name: The Mac Path Hack for Rust Library
-        run: |
-          # Створюємо фейкову структуру папок macOS на Linux-сервері
-          sudo mkdir -p "/Applications/Google Chrome.app/Contents/MacOS"
-          
-          # Робимо посилання з фейкового Mac-шляху на реальний Linux-браузер
-          sudo ln -s /usr/bin/google-chrome-stable "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+      - name: Build Rust App
+        run: cargo build --release
 
-      - name: Build and Run Screenshot Script
-        run: cargo run --release
+      - name: Run Scraper with Virtual Display
+        # Запускаємо через xvfb-run, щоб браузер працював у with_head() режимі без падіння
+        run: xvfb-run --auto-servernum cargo run --release
 
       - name: Upload Screenshot Artifact
         uses: actions/upload-artifact@v4
