@@ -1,8 +1,10 @@
-name: VOE Screenshot Chaser Oxide
+name: Standard Puppeteer Scraper
 
 on:
-  workflow_dispatch:
   push:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 7 * * *'
 
 jobs:
   take-screenshot:
@@ -12,22 +14,24 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install Rust Toolchain
-        uses: dtolnay/rust-toolchain@stable
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
 
-      # Встановлюємо Chrome + Xvfb (віртуальний монітор)
-      - name: Install Google Chrome and Xvfb
+      - name: Install Dependencies
         run: |
-          wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+          # Ініціалізуємо пакет і ставимо Puppeteer зі Stealth-плагіном
+          npm init -y
+          npm install puppeteer puppeteer-extra puppeteer-extra-plugin-stealth
+          
+          # Встановлюємо системні залежності для Chrome та Xvfb
           sudo apt-get update
-          sudo apt-get install -y ./google-chrome-stable_current_amd64.deb xvfb
+          sudo apt-get install -y xvfb libx11-xcb1 libxcomposite1 libxdamage1 libxrandr2 libxss1 libxtst6 libnss3 libatk-bridge2.0-0 libgtk-3-0 libasound2
 
-      - name: Build Rust App
-        run: cargo build --release
-
-      - name: Run Scraper with Virtual Display
-        # Запускаємо через xvfb-run, щоб браузер працював у with_head() режимі без падіння
-        run: xvfb-run --auto-servernum cargo run --release
+      - name: Run Puppeteer with Xvfb
+        # Запускаємо скрипт у віртуальному моніторі
+        run: xvfb-run --auto-servernum node scraper.js
 
       - name: Upload Screenshot Artifact
         uses: actions/upload-artifact@v4
