@@ -12,13 +12,13 @@ async fn main() -> anyhow::Result<()> {
 
     // 2. Увімкнення обходу захисту (на випадок Cloudflare або WAF на voe.com.ua)
     // Це фішка вашого репозиторію
-    browser.apply_bot_bypass().await?;
+    
 
     // 3. Навігація
     let url = "https://www.voe.com.ua/disconnection/detailed";
     println!("Navigating to: {}", url);
     browser.navigate_to(url).await?;
-
+    browser.handle_cloudflare(30000).await?;
     // 4. Очікування завантаження контенту (SPA сайти можуть вантажитись поступово)
     println!("Waiting for page load...");
     sleep(Duration::from_secs(10)).await;
