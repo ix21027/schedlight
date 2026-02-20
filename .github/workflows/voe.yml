@@ -1,8 +1,10 @@
 name: VOE Screenshot Automation
 
 on:
-  workflow_dispatch:
   push:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 7 * * *'
 
 jobs:
   take-screenshot:
@@ -38,5 +40,4 @@ jobs:
         with:
           name: voe-page-screenshot
           path: voe_detailed.png
-          retention-days: 5
           retention-days: 5
