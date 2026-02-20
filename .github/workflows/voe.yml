@@ -2,8 +2,7 @@ name: VOE Screenshot Chaser Oxide
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: '0 7 * * *'
+  push:
 
 jobs:
   take-screenshot:
