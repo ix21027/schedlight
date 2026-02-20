@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-# Підключаємо бібліотеку прямо з GitHub, оскільки це надійніше для нових проєктів
-hca = { git = "https://github.com/marirs/headless-chrome-automation.git" }
+chaser-oxide = "0.1" # або "0.1.2", яка зараз є актуальною
 tokio = { version = "1.0", features = ["full"] }
+futures = "0.3"
 anyhow = "1.0"
