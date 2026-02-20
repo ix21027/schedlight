@@ -15,17 +15,30 @@ jobs:
       - name: Install Rust Toolchain
         uses: dtolnay/rust-toolchain@stable
 
-      # НАДІЙНИЙ СПОСІБ ВСТАНОВЛЕННЯ CHROME
       - name: Setup Chrome
+        id: chrome
         uses: browser-actions/setup-chrome@v1
         with:
           chrome-version: stable
 
-      # Перевірка, що Chrome дійсно встановлено (допоможе нам, якщо щось піде не так)
-      - name: Verify Chrome Installation
-        run: google-chrome --version
+      # РОБИМО БРАУЗЕР ВИДИМИМ ДЛЯ RUST
+      - name: Create Symlinks for Rust Library
+        run: |
+          echo "Встановлено Chrome за шляхом: ${{ steps.chrome.outputs.chrome-path }}"
+          # Створюємо посилання на всі можливі назви, які може шукати бібліотека
+          sudo ln -sf ${{ steps.chrome.outputs.chrome-path }} /usr/bin/google-chrome
+          sudo ln -sf ${{ steps.chrome.outputs.chrome-path }} /usr/bin/google-chrome-stable
+          sudo ln -sf ${{ steps.chrome.outputs.chrome-path }} /usr/bin/chromium
+          sudo ln -sf ${{ steps.chrome.outputs.chrome-path }} /usr/bin/chromium-browser
+          sudo ln -sf ${{ steps.chrome.outputs.chrome-path }} /usr/bin/chrome
+          
+          # Перевіряємо, чи працює основне посилання
+          google-chrome-stable --version
 
       - name: Build and Run Screenshot Script
+        env:
+          # Вмикаємо детальний вивід помилок Rust
+          RUST_BACKTRACE: 1
         run: cargo run --release
 
       - name: Upload Screenshot Artifact
