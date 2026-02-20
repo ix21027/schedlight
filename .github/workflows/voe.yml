@@ -24,7 +24,7 @@ jobs:
           # Перевіряємо, чи браузер запускається і не падає
           google-chrome-stable --version
 
-            - name: Build and Run Screenshot Script
+      - name: Build and Run Screenshot Script
         env:
           # Вказуємо бібліотеці всі можливі змінні шляху (на випадок, якщо вона їх підтримує)
           CHROME_PATH: /usr/bin/google-chrome-stable
