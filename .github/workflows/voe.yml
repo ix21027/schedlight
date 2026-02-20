@@ -15,28 +15,22 @@ jobs:
       - name: Install Rust Toolchain
         uses: dtolnay/rust-toolchain@stable
 
-      # НАЙНАДІЙНІШИЙ СПОСІБ: Встановлення через офіційний .deb пакет
-      # Це гарантовано підтягне всі X11, NSS та інші системні залежності
-      - name: Install Google Chrome with all dependencies
+      - name: Install Google Chrome (Linux version)
         run: |
           wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
           sudo apt-get install -y ./google-chrome-stable_current_amd64.deb
-          # Перевіряємо, чи браузер запускається і не падає
-          google-chrome-stable --version
+
+      # ОСЬ НАШ ГЕНІАЛЬНИЙ ХАК
+      - name: The Mac Path Hack for Rust Library
+        run: |
+          # Створюємо фейкову структуру папок macOS на Linux-сервері
+          sudo mkdir -p "/Applications/Google Chrome.app/Contents/MacOS"
+          
+          # Робимо посилання з фейкового Mac-шляху на реальний Linux-браузер
+          sudo ln -s /usr/bin/google-chrome-stable "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
 
       - name: Build and Run Screenshot Script
-        env:
-          # Вказуємо бібліотеці всі можливі змінні шляху (на випадок, якщо вона їх підтримує)
-          CHROME_PATH: /usr/bin/google-chrome-stable
-          CHROME_BIN: /usr/bin/google-chrome-stable
-          BROWSER_PATH: /usr/bin/google-chrome-stable
-        run: |
-          # Встановлюємо strace (утиліта для відстеження системних викликів)
-          sudo apt-get install -y strace
-          
-          # Запускаємо нашу програму через strace, відстежуючи ТІЛЬКИ спроби запуску файлів
-          strace -f -e trace=execve cargo run --release
-
+        run: cargo run --release
 
       - name: Upload Screenshot Artifact
         uses: actions/upload-artifact@v4
@@ -44,4 +38,5 @@ jobs:
         with:
           name: voe-page-screenshot
           path: voe_detailed.png
+          retention-days: 5
           retention-days: 5
