@@ -1,9 +1,7 @@
 name: VOE Screenshot Automation
 
 on:
-  workflow_dispatch:      # Дозволяє запускати вручну кнопку "Run workflow"
-  # schedule:
-    # - cron: '0 7 * * *'   # Запуск щодня о 07:00 UTC (09:00 або 10:00 за Києвом)
+  workflow_dispatch:
 
 jobs:
   take-screenshot:
@@ -16,19 +14,18 @@ jobs:
       - name: Install Rust Toolchain
         uses: dtolnay/rust-toolchain@stable
 
-      - name: Install Google Chrome
-        # Бібліотека використовує Chrome DevTools Protocol, тому потрібен браузер
+      # ДОДАЙТЕ ЦЕЙ КРОК: Встановлення браузера
+      - name: Install Chromium Browser
         run: |
           sudo apt-get update
-          sudo apt-get install -y google-chrome-stable
+          sudo apt-get install -y chromium-browser chromium
 
       - name: Build and Run Screenshot Script
         run: cargo run --release
-        
+
       - name: Upload Screenshot Artifact
-        # Цей крок завантажить файл, щоб ви могли його скачати в інтерфейсі GitHub
         uses: actions/upload-artifact@v4
-        if: always() # Завантажити навіть якщо щось пішло не так, але файл створено
+        if: always()
         with:
           name: voe-page-screenshot
           path: voe_detailed.png
