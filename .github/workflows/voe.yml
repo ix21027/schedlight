@@ -2,6 +2,7 @@ name: VOE Screenshot Automation
 
 on:
   workflow_dispatch:
+  push:
 
 jobs:
   take-screenshot:
@@ -14,11 +15,15 @@ jobs:
       - name: Install Rust Toolchain
         uses: dtolnay/rust-toolchain@stable
 
-      # ДОДАЙТЕ ЦЕЙ КРОК: Встановлення браузера
-      - name: Install Chromium Browser
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y chromium-browser chromium
+      # НАДІЙНИЙ СПОСІБ ВСТАНОВЛЕННЯ CHROME
+      - name: Setup Chrome
+        uses: browser-actions/setup-chrome@v1
+        with:
+          chrome-version: stable
+
+      # Перевірка, що Chrome дійсно встановлено (допоможе нам, якщо щось піде не так)
+      - name: Verify Chrome Installation
+        run: google-chrome --version
 
       - name: Build and Run Screenshot Script
         run: cargo run --release
