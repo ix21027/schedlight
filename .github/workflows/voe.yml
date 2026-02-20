@@ -15,29 +15,18 @@ jobs:
       - name: Install Rust Toolchain
         uses: dtolnay/rust-toolchain@stable
 
-      - name: Setup Chrome
-        id: chrome
-        uses: browser-actions/setup-chrome@v1
-        with:
-          chrome-version: stable
-
-      # РОБИМО БРАУЗЕР ВИДИМИМ ДЛЯ RUST
-      - name: Create Symlinks for Rust Library
+      # НАЙНАДІЙНІШИЙ СПОСІБ: Встановлення через офіційний .deb пакет
+      # Це гарантовано підтягне всі X11, NSS та інші системні залежності
+      - name: Install Google Chrome with all dependencies
         run: |
-          echo "Встановлено Chrome за шляхом: ${{ steps.chrome.outputs.chrome-path }}"
-          # Створюємо посилання на всі можливі назви, які може шукати бібліотека
-          sudo ln -sf ${{ steps.chrome.outputs.chrome-path }} /usr/bin/google-chrome
-          sudo ln -sf ${{ steps.chrome.outputs.chrome-path }} /usr/bin/google-chrome-stable
-          sudo ln -sf ${{ steps.chrome.outputs.chrome-path }} /usr/bin/chromium
-          sudo ln -sf ${{ steps.chrome.outputs.chrome-path }} /usr/bin/chromium-browser
-          sudo ln -sf ${{ steps.chrome.outputs.chrome-path }} /usr/bin/chrome
-          
-          # Перевіряємо, чи працює основне посилання
+          wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+          sudo apt-get install -y ./google-chrome-stable_current_amd64.deb
+          # Перевіряємо, чи браузер запускається і не падає
           google-chrome-stable --version
 
       - name: Build and Run Screenshot Script
         env:
-          # Вмикаємо детальний вивід помилок Rust
+          # Залишаємо детальний лог, на випадок якщо щось піде не так
           RUST_BACKTRACE: 1
         run: cargo run --release
 
